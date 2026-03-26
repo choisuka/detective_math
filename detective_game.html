@@ -410,9 +410,58 @@ body{
 .btn-home{
   padding:.7rem;border-radius:12px;border:1px solid rgba(255,255,255,.1);
   background:transparent;color:var(--muted);font-size:.84rem;cursor:pointer;}
+
+/* 게임화 모달 공통 */
+.gm-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.82);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+.gm-overlay.show{display:flex;animation:gmFadeIn .2s ease}
+@keyframes gmFadeIn{from{opacity:0}to{opacity:1}}
+.gm-box{background:#120a00;border:1.5px solid rgba(212,160,23,.4);border-radius:22px;padding:1.8rem 1.5rem;width:100%;max-width:420px;position:relative;animation:gmPop .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes gmPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.gm-close{position:absolute;top:.8rem;right:.8rem;background:rgba(255,255,255,.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem}
+.gm-title{font-weight:800;font-size:1.2rem;color:var(--paper);margin-bottom:1rem;text-align:center}
 </style>
+<script src="../toro_ai.js"></script>
 </head>
 <body>
+<a href="../armoonia_hub/index.html" style="position:fixed;top:12px;left:12px;z-index:999;background:rgba(10,10,26,.88);border:1px solid rgba(168,85,247,.4);color:#c084fc;text-decoration:none;border-radius:20px;padding:6px 15px;font-family:'Jua',sans-serif;font-size:.8rem;backdrop-filter:blur(8px)">🏠 허브</a>
+
+<!-- 게임화 UI -->
+<button id="toro-compass-btn" onclick="showCompassHint()" style="position:fixed;bottom:80px;right:20px;z-index:100;width:54px;height:54px;border-radius:50%;border:none;background:linear-gradient(135deg,#1a3a5a,#3498db);color:#fff;font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(52,152,219,.4)">🧭</button>
+
+<div id="compass-modal" class="gm-overlay" onclick="if(event.target===this)closeCompassModal()">
+  <div class="gm-box">
+    <button class="gm-close" onclick="closeCompassModal()">✕</button>
+    <div class="gm-title">🧭 토로의 나침반</div>
+    <div id="compass-hint-text" style="color:#fbbf24;font-size:.95rem;line-height:1.8;text-align:center;padding:.5rem 0"></div>
+  </div>
+</div>
+
+<div id="artifact-modal" class="gm-overlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="gm-box" style="text-align:center">
+    <button class="gm-close" onclick="document.getElementById('artifact-modal').classList.remove('show')">✕</button>
+    <div style="font-size:3rem;margin-bottom:.5rem" id="artifact-modal-emoji">🔍</div>
+    <div class="gm-title" id="artifact-modal-name">유물 획득!</div>
+    <div style="color:#94a3b8;font-size:.85rem;margin-bottom:.5rem" id="artifact-modal-island"></div>
+    <div style="color:var(--paper);font-size:.9rem;font-style:italic;padding:.75rem 1rem;background:rgba(255,255,255,.04);border-radius:12px;margin-bottom:1rem" id="artifact-modal-quote"></div>
+    <button onclick="document.getElementById('artifact-modal').classList.remove('show')" style="background:linear-gradient(135deg,#b45309,#d97706);color:#fff;border:none;border-radius:20px;padding:10px 28px;font-size:.95rem;cursor:pointer">확인!</button>
+  </div>
+</div>
+
+<div id="artifact-collection-modal" class="gm-overlay" onclick="if(event.target===this)closeArtifactCollection()">
+  <div class="gm-box" style="max-width:480px">
+    <button class="gm-close" onclick="closeArtifactCollection()">✕</button>
+    <div class="gm-title">🏆 유물 컬렉션</div>
+    <div id="artifact-collection-inner" style="display:flex;flex-direction:column;gap:.6rem"></div>
+  </div>
+</div>
+
+<div id="log-modal" class="gm-overlay" onclick="if(event.target===this)closeLog()">
+  <div class="gm-box" style="max-width:480px">
+    <button class="gm-close" onclick="closeLog()">✕</button>
+    <div class="gm-title">📖 항해 일지</div>
+    <div id="log-inner" style="display:flex;flex-direction:column;gap:.5rem;max-height:60vh;overflow-y:auto"></div>
+  </div>
+</div>
 
 <div id="flash-overlay" class="flash-overlay"></div>
 <div id="msb" class="msb">
@@ -487,6 +536,10 @@ body{
 
 <!-- ===== TITLE ===== -->
 <div id="sc-title" class="screen active">
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:.75rem;padding-top:.5rem">
+    <button onclick="showArtifactCollection()" style="background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3);color:#fbbf24;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:.82rem">🏆 <span id="artifact-count-badge">0개</span></button>
+    <button onclick="showLog()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:.82rem">📖 일지</button>
+  </div>
   <div class="agency">
     <span class="agency-badge" style="font-size:3.8rem;flex-shrink:0">🔍</span>
     <div style="flex:1;text-align:left">
@@ -509,6 +562,11 @@ body{
   </div>
   <div style="text-align:center;color:#2a1800;font-size:.72rem">
     500점 달성 → 주관식 수사 개시 · 콤보 3=×2, 5=×3, 10=×5
+  </div>
+  <div style="margin-top:1rem;padding:.9rem 1rem;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:14px;text-align:center">
+    <div style="font-size:.78rem;color:rgba(167,139,250,.8);margin-bottom:.5rem">✨ 방정식이 처음이라면?</div>
+    <div style="font-size:.75rem;color:rgba(255,255,255,.45);margin-bottom:.7rem">문자·대입·일차식 기초를 먼저 다지면 사건 해결이 훨씬 쉬워져요!</div>
+    <a href="../algebra_game/algebra_game.html" style="display:inline-block;background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(139,92,246,.2));border:1px solid rgba(167,139,250,.4);color:#c4b5fd;border-radius:10px;padding:.45rem 1.1rem;font-size:.8rem;font-weight:700;text-decoration:none">✨ 마법학교에서 기초 다지기 →</a>
   </div>
 </div>
 
@@ -540,6 +598,9 @@ body{
         <button class="fill-submit" onclick="checkFill()">제출</button>
       </div>
       <div class="q-ctr" id="q-ctr"></div>
+      <div style="text-align:center;margin-top:8px">
+        <button id="skip-btn" onclick="skipQDet()" style="background:none;border:1px solid rgba(212,160,23,.2);color:rgba(212,160,23,.45);border-radius:8px;padding:6px 18px;font-size:.78rem;cursor:pointer">건너뛰기 ↩</button>
+      </div>
     </div>
     <!-- 우: 개념 참조 패널 -->
     <div class="concept-panel" id="concept-panel"></div>
@@ -563,6 +624,13 @@ body{
   <div class="solved-btns">
     <button class="btn-nxt" id="btn-nxt" onclick="nextCase()"></button>
     <button class="btn-home" onclick="goHome()">🏠 수사국으로</button>
+  </div>
+  <div style="margin-top:.9rem;padding:.8rem 1rem;background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2);border-radius:14px;text-align:center">
+    <div style="font-size:.73rem;color:rgba(255,255,255,.4);margin-bottom:.55rem">📚 관련 단원 바로가기</div>
+    <div style="display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap">
+      <a href="../algebra_game/algebra_game.html" style="display:inline-block;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.35);color:#c4b5fd;border-radius:9px;padding:.38rem .9rem;font-size:.76rem;font-weight:700;text-decoration:none">✨ 마법학교 — 일차방정식 기초</a>
+      <a href="../math_game/index.html" style="display:inline-block;background:rgba(96,165,250,.12);border:1px solid rgba(96,165,250,.3);color:#93c5fd;border-radius:9px;padding:.38rem .9rem;font-size:.76rem;font-weight:700;text-decoration:none">🔢 수학왕국 — 드릴 연습</a>
+    </div>
   </div>
 </div>
 
@@ -1387,6 +1455,8 @@ function renderQ(){
   if(S.qIdx>=S.qList.length){endCase();return;}
   const q=S.qList[S.qIdx];
   S.curQ=q;
+  const skipEl=document.getElementById('skip-btn');
+  if(skipEl) skipEl.style.display='inline-block';
   const cm=CASES_META[S.caseIdx];
   document.getElementById('ev-case-tag').textContent=`📁 ${cm.id} — ${cm.type}`;
   document.getElementById('ev-clue-n').textContent=`단서 #${S.qIdx+1} / ${S.qList.length}`;
@@ -1427,6 +1497,8 @@ function renderFill(){
 
 function checkMCQ(clicked,correct){
   clearTimer();
+  const skipEl=document.getElementById('skip-btn');
+  if(skipEl) skipEl.style.display='none';
   document.querySelectorAll('.cbtn').forEach(b=>b.disabled=true);
   const ok=clicked===correct;
   document.querySelectorAll('.cbtn')[clicked].classList.add(ok?'correct':'wrong');
@@ -1436,6 +1508,8 @@ function checkMCQ(clicked,correct){
 
 function checkFill(){
   clearTimer();
+  const skipEl=document.getElementById('skip-btn');
+  if(skipEl) skipEl.style.display='none';
   const raw=document.getElementById('fill-input').value.trim();
   const ok=norm(raw)===norm(String(S.curQ.fill));
   handleAnswer(ok);
@@ -1454,6 +1528,7 @@ function handleAnswer(ok){
   flash.className='flash-overlay'; void flash.offsetWidth;
   if(ok){
     S.combo++; S.maxCombo=Math.max(S.maxCombo,S.combo); S.correct++;
+    if(typeof toroSay==='function') toroSay('detective','correct',{combo:S.combo});
     const mult=S.combo>=10?5:S.combo>=5?3:S.combo>=3?2:1;
     const base=S.mode==='mcq'?300:800;
     const earned=base*mult;
@@ -1467,6 +1542,7 @@ function handleAnswer(ok){
     showExp(S.curQ,true,false);
   } else {
     S.combo=0;
+    if(typeof toroSay==='function') toroSay('detective','wrong');
     flash.className='flash-overlay red';
     updateUI();
     showExp(S.curQ,false,false);
@@ -1513,6 +1589,14 @@ function showExp(q, ok, timeUp){
   ).join('');
   document.getElementById('exp-overlay').classList.add('show');
 }
+function skipQDet(){
+  clearTimer();
+  const skipEl=document.getElementById('skip-btn');
+  if(skipEl) skipEl.style.display='none';
+  S.qIdx++;
+  if(S.qIdx>=S.qList.length) endCase(); else renderQ();
+}
+
 function closeExp(){
   document.getElementById('exp-overlay').classList.remove('show');
   S.qIdx++;
@@ -1566,14 +1650,107 @@ function endCase(){
     nb.textContent=`${next.emoji} 다음 사건: ${next.title} →`;
   } else {nb.style.display='none';}
   showScreen('sc-solved');
+  // 유물 수여
+  addLog('game','detective','사건 '+(S.caseIdx+1)+' 해결: '+acc+'% 정답률');
+  awardArtifact('detective_case');
+  if(S.done.every(function(v){return v;})) awardArtifact('detective_master');
 }
 function nextCase(){
   if(S.caseIdx<4) openCase(S.caseIdx+1);
   else goHome();
 }
 
+// =====================================================
+// 게임화: 유물·나침반·항해 일지
+// =====================================================
+const ARTIFACTS={
+  'detective_case':{island:'탐정 사무소',emoji:'🕵️',quote:'논리는 최고의 탐정 도구다.',color:'#86efac'},
+  'detective_master':{island:'탐정 사무소',emoji:'🔍',quote:'모든 문제에는 반드시 단서가 있다.',color:'#34d399'}
+};
+const TORO_COMPASS={
+  'detective':["수학 문제를 탐정처럼 푼다면, 첫 번째 단서는 뭘까?","조건이 하나 더 있다면 답이 달라질까?"]
+};
+
+function getArtifacts(){
+  try{return JSON.parse(localStorage.getItem('armoonia_artifacts')||'[]');}
+  catch(e){return[];}
+}
+function awardArtifact(setName){
+  var info=ARTIFACTS[setName];
+  if(!info)return;
+  var earned=getArtifacts();
+  if(earned.indexOf(setName)!==-1)return;
+  earned.push(setName);
+  localStorage.setItem('armoonia_artifacts',JSON.stringify(earned));
+  updateArtifactBadge();
+  var modal=document.getElementById('artifact-modal');
+  document.getElementById('artifact-modal-emoji').textContent=info.emoji;
+  document.getElementById('artifact-modal-name').textContent='유물 획득: '+info.island;
+  document.getElementById('artifact-modal-island').textContent=info.island;
+  document.getElementById('artifact-modal-quote').textContent='"'+info.quote+'"';
+  modal.classList.add('show');
+  addLog('artifact','detective','유물 획득: '+info.emoji+' '+info.island);
+}
+function addLog(type,hub,content){
+  var log;
+  try{log=JSON.parse(localStorage.getItem('armoonia_log')||'[]');}
+  catch(e){log=[];}
+  var today=(function(){var d=new Date();return d.getFullYear()+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getDate().toString().padStart(2,'0');})();
+  log.unshift({date:today,type:type,hub:hub,content:content});
+  if(log.length>50)log=log.slice(0,50);
+  localStorage.setItem('armoonia_log',JSON.stringify(log));
+}
+function showArtifactCollection(){
+  var earned=getArtifacts();
+  var inner=document.getElementById('artifact-collection-inner');
+  if(earned.length===0){
+    inner.innerHTML='<div style="text-align:center;color:#64748b;padding:1.5rem">아직 유물이 없어요. 사건을 해결해 보세요!</div>';
+  }else{
+    inner.innerHTML=earned.map(function(k){
+      var a=ARTIFACTS[k];
+      if(!a)return'';
+      return'<div style="display:flex;align-items:center;gap:.75rem;background:rgba(255,255,255,.04);border-radius:12px;padding:.75rem 1rem;border:1px solid rgba(212,160,23,.15)">'
+        +'<span style="font-size:2rem">'+a.emoji+'</span>'
+        +'<div><div style="color:var(--paper);font-weight:700;font-size:.9rem">'+a.island+'</div>'
+        +'<div style="color:var(--muted);font-size:.78rem;font-style:italic">"'+a.quote+'"</div></div></div>';
+    }).join('');
+  }
+  document.getElementById('artifact-collection-modal').classList.add('show');
+}
+function closeArtifactCollection(){document.getElementById('artifact-collection-modal').classList.remove('show');}
+function showLog(){
+  var log;
+  try{log=JSON.parse(localStorage.getItem('armoonia_log')||'[]');}
+  catch(e){log=[];}
+  var inner=document.getElementById('log-inner');
+  if(log.length===0){
+    inner.innerHTML='<div style="text-align:center;color:#64748b;padding:1.5rem">아직 기록이 없어요.</div>';
+  }else{
+    inner.innerHTML=log.map(function(l){
+      return'<div style="background:rgba(255,255,255,.03);border-radius:10px;padding:.6rem .9rem;border-left:3px solid var(--gold)">'
+        +'<div style="font-size:.72rem;color:var(--muted);margin-bottom:.2rem">'+l.date+' · '+l.hub+'</div>'
+        +'<div style="color:var(--paper);font-size:.85rem">'+l.content+'</div></div>';
+    }).join('');
+  }
+  document.getElementById('log-modal').classList.add('show');
+}
+function closeLog(){document.getElementById('log-modal').classList.remove('show');}
+function updateArtifactBadge(){
+  var earned=getArtifacts();
+  var badge=document.getElementById('artifact-count-badge');
+  if(badge)badge.textContent=earned.length+'개';
+}
+function showCompassHint(){
+  var hints=TORO_COMPASS['detective'];
+  if(!hints||!hints.length)return;
+  var h=hints[Math.floor(Math.random()*hints.length)];
+  document.getElementById('compass-hint-text').textContent=h;
+  document.getElementById('compass-modal').classList.add('show');
+}
+function closeCompassModal(){document.getElementById('compass-modal').classList.remove('show');}
+
 // INIT
-window.onload=function(){loadSave();renderTitle();};
+window.onload=function(){loadSave();renderTitle();updateArtifactBadge();};
 </script>
 </body>
 </html>
