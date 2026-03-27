@@ -8,8 +8,6 @@
 
 ## 내용
 
-방정식 활용 문제를 탐정 사건 형식으로 학습:
-
 | 사건 유형 | 내용 |
 |---|---|
 | 🚗 속력·거리 | 거리 = 속력 × 시간 |
@@ -25,8 +23,16 @@
 - 🏆 유물 컬렉션, 📖 수사 일지
 - 대상: 중학교 1~2학년
 
+---
+
+## 메인 허브
+
+https://choisuka.github.io/
+
 ## 관련 앱
 
-- 메인 허브: https://choisuka.github.io/
-- 아르모니아 수학왕국: https://choisuka.github.io/toro_math/
-- 마법학교 중등형: https://choisuka.github.io/algebra_game/
+| 앱 | 링크 | 설명 |
+|---|---|---|
+| 아르모니아 수학왕국 | https://choisuka.github.io/toro_math/ | 방정식 개념카드 |
+| 마법학교 중등형 | https://choisuka.github.io/algebra_game/ | 중등 대수 |
+| 수학왕국 드릴형 | https://choisuka.github.io/math_game/ | 중등 드릴 |
