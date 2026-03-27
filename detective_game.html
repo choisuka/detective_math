@@ -536,9 +536,12 @@ body{
 
 <!-- ===== TITLE ===== -->
 <div id="sc-title" class="screen active">
-  <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:.75rem;padding-top:.5rem">
-    <button onclick="showArtifactCollection()" style="background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3);color:#fbbf24;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:.82rem">🏆 <span id="artifact-count-badge">0개</span></button>
-    <button onclick="showLog()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:.82rem">📖 일지</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:.75rem;padding-top:.5rem">
+    <a href="https://choisuka.github.io/" style="font-size:.82rem;color:var(--muted);text-decoration:none;background:rgba(255,255,255,.05);padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);font-family:inherit">← 메인 허브</a>
+    <div style="display:flex;gap:8px">
+      <button onclick="showArtifactCollection()" style="background:rgba(212,160,23,.12);border:1px solid rgba(212,160,23,.3);color:#fbbf24;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:.82rem">🏆 <span id="artifact-count-badge">0개</span></button>
+      <button onclick="showLog()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:.82rem">📖 일지</button>
+    </div>
   </div>
   <div class="agency">
     <span class="agency-badge" style="font-size:3.8rem;flex-shrink:0">🔍</span>
