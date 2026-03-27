@@ -36,3 +36,7 @@ https://choisuka.github.io/
 | 아르모니아 수학왕국 | https://choisuka.github.io/toro_math/ | 방정식 개념카드 |
 | 마법학교 중등형 | https://choisuka.github.io/algebra_game/ | 중등 대수 |
 | 수학왕국 드릴형 | https://choisuka.github.io/math_game/ | 중등 드릴 |
+
+## 개발 정보
+- 로컬 폴더: `C:/Users/USER/detective_math`
+- GitHub 레포: `choisuka/detective_math`
